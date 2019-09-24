@@ -1,0 +1,581 @@
+The different Enterprize services are:
+	-Transaction management
+	-Distributed txs
+	-Persistant mechanism
+	-Security
+	-Logging
+	-Exceptions
+	-Remoting
+	-jndi
+	-Application resources
+		such as connection pooling, etc
+        ....
+
+public class Operation{  //Java bean
+	public int add(int x, int y){return x + y;}
+	public int sub(int x, int y){return x - y;}
+	public int div(int x, int y){return x / y;}
+	public int mul(int x, int y){return x * y;}
+}
+
+public class TransferMoney{ //Java bean
+	public void transfer(-,-){
+		SELECT
+		UPDATE
+		UPDATE
+	}
+}
+implement logging service
+implement tx service
+
+There are 3 spring features:
+1) Inversion Of Control(IOC) / Dependecy Injection (DI)
+2) Aspect Oriented Programming (AOP)
+3) Light weight controller
+
+
+		Spring Framework Architecture
+		=============================
+#Spring configuration file
+#applicationContext.xml   which is default spring configuration file.
+<beans>
+   <bean id="id1" class="fully qualified bean class name"/>
+   <bean id="id2" class="fully qualified bean class name"/>
+   ...
+</beans>
+------------------------------------------------------------------
+The entry point in Spring Framework is:
+BeanFactory<<interface>>
+	-XmlBeanFactory
+	-ApplicationContext<<interface>>
+		--FileSystemXmlApplicationContext
+		--ClassPathXmlApplicationContext
+		--XmlWebApplicationContext
+		--AnnotationConfigApplicationContext
+		...
+
+--------------------------------------------------
+BeanFactory factory = new XmlBeanFactory("applicationContext.xml");
+-Starts Spring Container.
+-Loads Spring configuration file into the Spring Container.
+-Parses Spring configuration file using XML parser.
+-Gathers complete information about every bean using Introspection mechanism and create BeanInfo object.
+-Creates key/value based Map such as HashMap, where unique bean id becomes key & above BeanInfo object becomes value.
+-When required i.e., when getBean(String id) method is invoked, the actual bean object is created using above BeanInfo.
+-Returns reference to above bean object is called as Dispense bean.
+-If bean object is no longer required, then it is removed from container. 
+--------------------------------------------
+
+ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");
+-Starts Spring Framework (or Spring context).
+-Loads Spring configuration file into the Spring Framework.
+-Parses Spring configuration file using XML parser.
+-Instantiates bean objects before ( or without) invoking getBean() method.
+-Creates key/value based Map such as HashMap, Where unique bean id becomes key & above bean object becomes value.
+-When getBean() method is invoked, the reference to above bean object is returned which is called as Dispense bean
+-If bean object is no longer required, then it is removed from framework. 
+--------------------------------------------
+
+Diff between Spring Container & Spring Framework
+=================================================
+The BeanFactory means Spring Container Lazily instantiates bean object only after invoking getBean() method at runtime.
+The ApplicationContext means Spring Framework Eagerly(immediatly) instantiates bean object during deployement time and before (or without) invoking getBean() method.
+
+The attributes of the <bean> element are:
+<bean   id="unique bean id without special characters" - optional
+	name="unique bean name may contains special characters such as /" - optional
+	class="fully qualified bean class name"
+	scope="singleton | prototype | request | session"
+	abstract="false | true"
+	lazy-init="default | true | false"
+	autowire="no | byName | byType | constructor"
+	init-method="specify initialization method name without parantheses"
+	destroy-method="close method name without parantheses">
+	
+By default, the scope is singleton, means only one bean object is created irrespective of number of times getBean() method with same id is invoked.
+The 'prototype' scope means a separate object is created every time when getBean() method with same id is invoked.
+lazy-init="default", it automatically becomes "true" if it is a BeanFactory means spring container, otherwise automatically becomes "false" if it is ApplicationContext means spring frmework.
+lazy-init="false", then this particular bean is always eagerly instantiated irrespective of container or framework.
+lazy-init="true", then this particular bean is always lazily instantiated irrespective of container or framework.
+The 'init-method' is invoked immediatly after bean object is instantiated.
+The 'destroy-method' is invoked just before bean object is removed from the container.
+The init-method & destroy-method are called as life cycle methods.
+
+There are 3 types of IOCs among IOC Frameworks such as Spring, Avalon, Struts2, JSF2, EJB3:
+1) Setter based IOC
+2) Constructor based IOC
+3) Interface dependency
+
+Out of 3 IOCs, the SPRING framework supports only Setter & Constructor based IOCs.
+The STRUTS2 and AVALON frameworks additionally support Interface dependency.
+
+The sub element of <bean> element depends on setter or constructor based IOC.
+In case of Setter based IOC, the sub element of <bean> element becomes <property> element.
+
+The sub element of the <property> element depends on parameter type of setter method:
+primitive type or String - <value>
+array			 - <array>
+java.util.List        	 - <list>
+java.util.Set		 - <set>
+java.util.Map		 - <map>
+java.util.Properties 	 - <props>
+other object		 - <ref>
+null reference		 - <null/>
+inner bean		 - <bean>
+across config files	 - <idref>
+
+In case of Constructor based IOC, the sub element of <bean> element becomes <constructor-arg> element.
+
+public class Rectangle{
+	int widht;
+	int height;
+	public Rectangle(){
+		width = height = 10;
+	}
+	public Rectangle(int w){
+		widht = w;
+		height = 10;
+	}
+	public Rectangle(int w, int h){
+		widht = w;
+		height = h;
+	}
+}
+
+
+1)<bean id="r1" class="Rectangle"/>
+	This is equivalent to:
+	Rectangle r1 = new Rectangle();
+
+2)<bean id="r2" class="Rectangle">
+	<constructor-arg>	
+		<value>5</value>
+	</constructor-arg>
+  </bean>
+	This is equivalent to:
+	Rectangle r2 = new Rectangle(5);
+
+3)<bean id="r3" class="Rectangle">
+	<constructor-arg index="0">	
+		<value>5</value>
+	</constructor-arg>
+	<constructor-arg index="1">	
+		<value>10</value>
+	</constructor-arg>
+  </bean>
+	This is equivalent to:
+	Rectangle r3 = new Rectangle(5,10);
+
+We can implement same AOP applcation in 3 diff ways:
+1) Proxy based AOP: It is legacy approach hence it uses classes/interfaces from Spring API
+2) Declarative based AOP: Newly added in Spring2.5 and uses Binding annotations
+3) Annotation based AOP: Newly added in Spring2.5 and uses Java annotations
+
+In java there are 2 types of annotations:
+1) Java annotations
+	-Added to source code
+	-Prefixed with '@'
+	@Override
+
+2) Binding annotations
+	-Added to Configuration files (such as applicationContext.xml) 
+	-Wrapped inside < >
+	<aop:aspect/>
+
+	
+		Minimizing Spring Configuration 
+		===============================
+1) Explicit wiring	   : Using <property> or <constructor-arg> elements
+2) Autowiring		   : Eliminates both <property> and <constructor-arg> elements but 'autowire' attribute is required.
+3) Annotation based wiring : Eliminates <property>, <constructor-arg> and autowire attr
+4) Autodiscovery	   : Eliminates <bean> element itself
+
+In case of 'byName' wiring, If the property name in source code and bean id in config file matches, then bean class is automatically instantiated and injected.
+In case of 'byType' wiring, the property type in source code and bean class in spring config file should be compatible.
+Both 'byType' and 'byName' wiring uses setter based ioc.
+
+The 'id' attr of <bean> is not required if and only if:
+1) No need to pass such bean id as argument to getBean() method in client code.
+2) The 'byType' wiring in spring configuration file.
+
+In case of Annotation based wiring:
+1) The bean property must be annotated with @Autowired
+2) The setter & getter methods are not required.
+3) The constructors are not required because '@Autowired' always uses 'byType' wiring means Setter Based IOC.
+4) Add <context:annotation-config/> element in spring configuration file to enable annotations with spring container. 
+   Note: The above element is not required from Spring 4.0 because by default annotations are enabled from Spring 4.
+5) Both <property> and <constructor-arg> elements are eliminated.
+6) Additionally the 'autowire' attr is eliminated.
+Example:
+package edu.aspire.daos;
+public class AccountDaoImpl implements AccountDao{
+	@Autowired
+	private DataSource dataSource;
+}
+
+#applicationContext.xml
+<beans>
+	<context:annotation-config/>
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+	<bean id="accdao" class="edu.aspire.daos.AccountDaoImpl"/>
+</beans>
+
+
+In case of Autodiscovery:
+1) The bean class must be annotated with @Component or @Repository or @Service or @Controller
+2) All bean properties must be annotated with @Autowired
+3) Add <context:component-scan/> element in spring configuration file to enable Autodiscovery as well as Annotation based wiring. 
+4) The <bean> element itself is eliminated.
+
+Example:
+@Component("accdao")
+public class AccountDaoImpl implements AccountDao{
+	@Autowired
+	private DataSource dataSource;
+}
+
+#applicationContext.xml
+<beans>
+	<context:component-scan/>
+	<bean id="ds" class="org.apcahe.commons.dbcp.BasicDataSource">
+	<!-- The autodiscovery eliminates <bean> element.-->
+	<!--<bean id="accdao" class="edu.aspire.daos.AccountDaoImpl"/>-->
+</beans>
+
+
+			Spring DAO Philosiphy
+			=====================
+1) It is always recommended to expose DAO method details through DAO interface i.e., it is always recommended to write a separate DAO interface for every DAO impl class.
+2) All technology specific exceptions are wrapped into common set of spring exception types with org.springframework.dao.DataAccessException is root of the heirarchy, which is unchecked exception.
+Note: Generally spring exceptions are handled using AOP.
+
+The following files are requried:
+1) DAO Interface
+2) DAO Impl class
+3) Spring configuration file
+4) client code
+
+The means of connection for enterprise applicatins are DataSource but not DriverManager.
+Spring framework supports 3 types of DataSources:
+1) Built-in datasource
+	-This datasource comes along with spring framework download.
+	-Used only for testing.
+	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName">
+			<value>oracle.jdbc.driver.OracleDriver</value>
+		</property>
+		<property name="url">
+			<value>jdbc:oracle:thin:@localhost:1521:xe</value>
+		</property>
+		<property name="username">
+			<value>system</value>
+		</property>
+		<property name="password">
+			<value>manager</value>
+		</property>
+	</bean>
+
+2) Third-party datasources
+	-such as DBCP, C3P0, Proxool, etc
+	-DBCP mean DataBase Connection Pool
+	-Apache vendor
+	-commons-dbcp.jar
+	-commons-pool.jar
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+		-driverClassName
+		-url
+		-username
+		-password
+		-initialSize
+		-maxActive
+	</bean>
+
+3) JNDI datasource
+	-Used with legacy applications
+	-Used with Spring MVC or Spring Web Flow
+	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiName">
+			<value>java:comp/env/mypool</value>
+		</property>
+	</bean>
+
+In case of Built-In as well as Third-part datasources, it is the responsibility of spring container to create and manage pool of connections.
+In case of JNDI datasource, it is the responsibility of server (Tomcat, JBoss, etc) to create and manage pool of connections.
+
+Steps in JDBC
+-------------
+1) Declare Resources
+2) Get connection
+3) Prepare query
+4) Create JDBC statement & pass above query
+5) Invoke setter methods on psmt to set data
+6) Execute query
+7) Handle exceptions
+8) Release resources
+The above steps are common for INSERT, SELECT, UPDATE and DELETE operations. These db operations are called as "process".
+
+Fixed Steps			Variables Steps
+-----------			---------------
+1) Declare Resources
+2) Get connection
+				3) Prepare query
+				4) Create JDBC Statement & pass above query
+				5) Invoke setter methods on pstmt to set data
+6) Execute statement
+7) Handle exceptions
+8) Release resources
+
+process = Fixed Steps		+    Variables steps
+	  Template class        +    Callback interface having callback method (we have to override callback method to write variable steps).
+	  JdbcTemplate		     PreparedStatementCreator<<interface>>
+				        @Override
+				        public PreparedStatement createPreparedStatement(Connection con){
+						3) Prepare query
+						4) Create JDBC Statement & pass above query
+						5) Invoke setter methods on pstmt to set data
+					  return pstmt;
+				         }
+The design pattern we called as Template-Callback design pattern.
+
+			Spring with Hibernate
+			=====================
+Steps in Hibernate
+------------------
+1) Start Hibernate Framework
+2) Load Hibernate configuration file
+3) Build SessionFactory
+4) Open Session
+5) Begin transaction
+6) Create POJO object
+7) Invoke Session methods
+	save()
+	get()
+	update()
+	delete()
+8) Invoke flush() method
+9) commit tx
+10) close session
+
+
+Fixed Steps				Variable Steps
+-----------                     	--------------
+1) Start Hibernate Framework
+2) Load Hibernate configuration file
+3) Build SessionFactory
+4) Open Session
+5) Begin transaction
+					6) create pojo object
+					7) Invoke Session methods
+						save()
+						get()
+						update()
+						delete()
+
+8) Invoke flush() method
+9) commit tx
+10) close session
+
+Process = Fixed Steps		+    Variable Steps
+	  Template class         +    Callback interface
+	  HibernateTemplate	+    HibernateCallback<<interface>>
+				      public Object doInHibernate(Session s){
+					//2 variable steps
+ 				      }
+
+
+Steps in Spring with Hibernate
+------------------------------
+1) Relational Modeling
+	- Table name
+	- Column names
+	- Column types
+	- Column constrains such as primary key, unique, not null, check, etc
+	- Associations among tables
+		-- one-to-many
+		-- many-to-one
+		-- many-to-many
+		-- one-to-one
+
+2) Domain Modeling
+	- POJO class name
+	- property names
+	- Property types
+	- Associations among POJO classes using collection properties like List, Set, Map
+
+3) Hibernate Mapping file (.hbm.xml)
+	Maps Domain modeling with Relational modeling & Vice versa.
+
+4) Hibernate Configuration file (.cfg.xml)  - optional for Spring with Hibernate.
+   Which contains Hibernate properties.
+	-connection properties
+	-other hibernate properties
+	-MappingResources
+
+5) Dao Interface
+
+6) Dao Impl class
+
+7) Spring configuration file
+
+8) Client code
+
+
+			Spring Transactions
+			===================
+Like EJB, the spring supports both Programmatic & Declarative transactions.
+In case of Programmatic txs, our business component contains both db operations as well as transactional statements(nothing but atomicity code).
+In case of Declarative txs, our business component contains only db operations without transactional statements(nothing but atomicity code). Rather transactional statements are implemented as transaction advice and merged using AOP.
+The Programmatic transactions gives fine grained control, but Declarative transactions are very convinient to use. 
+Diff between Programatic & DEclarative txs
+------------------------------------------
+In case of programmatic txs, we have to write transactional code inside source code.
+But, in case of declarative txs, transactional code is removed from source code, instead configured in spring configuration  file using AOP.
+
+The spring framework doesn't have its own transaction mechanism, rather spring transactions are nothing but underlying persistent mechanism transactions:
+	SPRING  - JDBC
+		- HIBERNATE
+		- TOPLINK
+		- iBATIS
+		- EJB
+		...
+The responsibility of spring framework w.r.t tx management is simply receives transactional request from Java application, Delegates to underlying persistent mechanism, Receives tx status from persistent mechanism, Updates status back to client application i.e., act as TransactionManager.
+
+JDBC
+----
+con.setAutoCommit(false);
+....
+....
+con.commit(); / con.rollback();
+
+HIBERNATE
+---------
+Transaction tx = s.beginTransaction();
+....
+....
+tx.commit(); / tx.rollback();
+
+A separate TransactionManager is required for every persistent mechanism, since different persistent mechanisms manage transactions in different ways.
+
+DataSourceTransactionManager			HibernateTransactionManager
+
+
+
+   			     TransactionTemplate     -  TransactionCallback interface contains doInTransaction() method.
+
+To transfer amount from one account to another we need 3 db operations:
+	SELECT
+	UPDATE
+	UPDATE
+
+IOC is a wiring & AOP is a weaving.
+
+In case of Declarative Transactions:
+1) The business component contains only busienss logic
+2) The transactional statements (such as TransactionTemplate, TransactionCallback and doInTransaction()) are implemented in a separate transaction aspect.
+3) Above tx aspect is automatically provided by spring container
+4) Hence our business component and container provided tx aspect is merged using AOP:
+	1) decl txs using Proxy Based AOP	[classes/interfaces]
+	2) decl txs using Declrative Based AOP	[binding annotations]
+	3) decl txs using Annotation Based AOP	[java annotations]
+	
+
+What is DaoSupport class?
+------------------------
+The purpose of DaoSupport class is to eliminate template property from source code (DAO impl class) as well as eliminate <bean> element for Template class from spring configuration file.
+The Spring API provided a separate DaoSupport class for every persistant mechanism such as JdbcDaoSupport, HibernateDaoSupport, etc.
+Every DaoSupport class contains template as well as datasource private properties.
+Example:
+public class JdbcDaoSupport{ //built-in class
+	private JdbcTemplate jdbcTemplate;
+	private DataSource dataSource;
+	//setter and getter methods
+}
+
+public class HibernateDaoSupport{ //built-in class
+	private HibernateTemplate hibernateTemplate;
+	private SessionFactory sessionFactory;
+	//setter and getter methods
+}
+
+//dao impl class
+public class WithdrawDaoImpl extends HibernateDaoSupport{
+	
+}
+
+without DaoSupport class
+------------------------
+DaoImpl depends on Template class.
+Template class depends on SessionFactory
+SessionFactory depends on DataSource
+<bean>
+<bean>
+<bean>
+<bean>
+
+
+with DaoSupport class
+---------------------
+DaoImpl depends on SessionFactory.
+SessionFactory depends on DataSource
+<bean>
+<bean>
+<bean>
+
+Coupling - IOC - Wiring
+Cohesion - AOP - Weaving
+
+In case of declarative transactions:
+1) The business component contains only db operations without transactional statements.
+2) The transactional statements are implemented in a separate transaction aspect.
+3) The above transaction aspect is automatically provided by spring container.
+4) Hence our business component and container provided transaction aspect merged using AOP.
+	a) Decl transactions using Proxy Based AOP	 [uses classes/interfaces]
+	b) Decl transactions using Declarative Based AOP [uses Binding annotations]
+	c) Decl transactions using Annotation Based AOP	 [uses Java annotations]
+
+			SPRING MVC
+			==========
+1) JSP Model1 architecture
+==========================
+	-The controller is JSP
+	-Multiple controller JSPs for multiple req pages
+	-Decentralized
+
+2) JSP Model2 artchitecture
+===========================
+	-The controller is Servlet
+	-Either Multiple controller servlets OR Single controller servlet
+
+	a) MVC
+	   -Multiple controller servlets
+	   -Decentralized
+     
+        b) MVC2
+  	   -Single controller servlet (front controller)
+           -Centralized
+	
+Difference between conventional and annotation based controllers
+================================================================
+Conventional based controller
+------------------------------
+1) Our class is a subclass of Controller<<interface>>
+2) The method name must be always handleRequest()
+3) The controller class always has only one handleRequest() method.
+4) The handleRequest() method always takes two generic parameters: HttpServletRequest and HttpServletResponse
+5) The return type of handleRequest() method must be always ModelAndVeiew.
+6) Every controller class must be configured using a separate <bean> element or @Bean annotation.
+7) There is no separate java bean class hence we have to read I/P data from request object.
+
+
+Annotation based controller
+---------------------------
+1) Our class is annotated with @Controller annotation
+2) We can use our convinient method names. 
+3) Can have any number of request-handling methods provided the methods must be annotated with @RequestMapping.
+4) The request-handling method can include almost anything as a parameter such as HttpServletRequest, HttpServletResponse, Map<String, Object>, Value Object, etc.
+5) The return type of request-handling method may be String or data class or void or ModelAndView or any type.
+6) The @Controller is a specialization of @Component, hence eligible for autodiscovery i.e., neither <bean> element nor @Bean annotation is required.
+7) There is a separate Value Object(VO) class hence we can read I/P from VO obj.
+
+
+
